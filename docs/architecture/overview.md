@@ -2,11 +2,17 @@
 
 ## Status
 
-This document describes the intended final architecture. The components below are planned and will be introduced incrementally. Phase 0 contains repository scaffolding only.
+This document describes the intended final architecture. The components below will be introduced incrementally. The Phase 1 FastAPI foundation is implemented; databases, queues, workers, and infrastructure remain planned.
+
+## Current Phase 1 Boundary
+
+FastAPI is the first running application component. It provides the HTTP boundary, validates requests and responses through Pydantic, exposes versioned routes under `/api/v1`, and reads basic settings from environment variables. It does not persist data or process jobs yet.
+
+API versioning keeps the public contract explicit. Future breaking changes can be introduced under another version while existing clients continue using the current version.
 
 ## Intended System
 
-Clients will submit and inspect jobs through a versioned FastAPI REST API. The API will validate requests and coordinate durable state in PostgreSQL. Long-running work will be handed to a queue instead of being performed during the request.
+Clients will submit and inspect jobs through a versioned FastAPI REST API. The API will validate requests and eventually coordinate durable state in PostgreSQL. Long-running work will later be handed to a queue instead of being performed during the request.
 
 Redis is planned as the queue transport and for short-lived coordination data. Celery workers will consume queued jobs, execute the supported job types, and update job state. PostgreSQL will remain the source of truth for users, jobs, lifecycle state, retry information, and timestamps.
 

@@ -2,7 +2,7 @@
 
 A production-oriented portfolio project for learning how to design and operate a distributed job processing system. The platform will accept jobs through a versioned REST API, track their lifecycle, and process them asynchronously with workers.
 
-> **Current status:** Phase 0 complete. Repository and development environment initialized. Application features are planned.
+> **Current status:** Phase 1 complete. FastAPI backend foundation is available locally. Database, authentication, queues, workers, and deployment remain planned.
 
 ## Problem Statement
 
@@ -49,7 +49,7 @@ This architecture is planned. Its components will be introduced phase by phase a
 ## Development Phases
 
 1. Repository and development environment: **Complete**
-2. FastAPI backend foundation: **Planned**
+2. FastAPI backend foundation: **Complete**
 3. PostgreSQL database: **Planned**
 4. Job model and REST APIs: **Planned**
 5. Authentication and authorization: **Planned**
@@ -70,7 +70,7 @@ This architecture is planned. Its components will be introduced phase by phase a
 ## Project Structure
 
 ```text
-backend/                  # Backend application, added in later phases
+backend/                  # FastAPI backend foundation
 frontend/                 # React application, added in a later phase
 docs/architecture/        # Architecture decisions and diagrams
 docs/api/                 # API documentation, added with API endpoints
@@ -80,7 +80,31 @@ docs/development/         # Local development and contribution guidance
 
 ## Local Development
 
-Phase 0 requires only Python and Git. No packages or services are required yet.
+### Backend setup
+
+From the repository root, create a virtual environment, activate it, and install the Phase 1 dependencies:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r backend\requirements.txt
+```
+
+Start the API from the `backend` directory:
+
+```powershell
+Set-Location backend
+uvicorn app.main:app --reload
+```
+
+The API will be available at `http://127.0.0.1:8000`. Interactive API documentation is available at `/docs`.
+
+Run the backend tests from the `backend` directory:
+
+```powershell
+pytest
+```
 
 ```powershell
 python --version
@@ -89,7 +113,7 @@ git status
 git remote -v
 ```
 
-Application setup instructions will be added as each phase introduces a runnable component.
+PostgreSQL, Redis, workers, Docker, and cloud services are not required for Phase 1 and will be introduced in later phases.
 
 ## Environment Variables
 
@@ -100,11 +124,11 @@ Application setup instructions will be added as each phase introduces a runnable
 - [Architecture overview](docs/architecture/overview.md)
 - [Development guide](docs/development/development-guide.md)
 
-API documentation will be added when the first endpoint is implemented.
+See the [API endpoint documentation](docs/api/endpoints.md) for the currently available endpoints.
 
 ## Testing
 
-Automated tests are planned and will be introduced with the first application code. The project will use Pytest and tests will be run before meaningful commits.
+The Phase 1 backend uses Pytest. Run `pytest` from `backend/` before meaningful commits.
 
 ## Future Improvements
 
