@@ -5,10 +5,22 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 
+def _sanitize_error_details(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {str(key): _sanitize_error_details(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_sanitize_error_details(item) for item in value]
+    if isinstance(value, tuple):
+        return [_sanitize_error_details(item) for item in value]
+    if isinstance(value, (str, int, float, bool)) or value is None:
+        return value
+    return str(value)
+
+
 def _error_response(code: str, message: str, details: Any = None) -> dict[str, Any]:
     error: dict[str, Any] = {"code": code, "message": message}
     if details is not None:
-        error["details"] = details
+        error["details"] = _sanitize_error_details(details)
     return {"error": error}
 
 
