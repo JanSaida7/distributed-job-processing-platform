@@ -1,8 +1,8 @@
-# Distributed Job Processing Platform
+D:\distributed-job-processing-platform\.venv\Scripts\python.exe# Distributed Job Processing Platform
 
 A production-oriented portfolio project for learning how to design and operate a distributed job processing system. The platform will accept jobs through a versioned REST API, track their lifecycle, and process them asynchronously with workers.
 
-> **Current status:** Phase 1 complete. FastAPI backend foundation is available locally. Database, authentication, queues, workers, and deployment remain planned.
+> **Current status:** Phase 2 in progress. The PostgreSQL database foundation is implemented and being validated locally. Application tables and features remain planned.
 
 ## Problem Statement
 
@@ -50,7 +50,7 @@ This architecture is planned. Its components will be introduced phase by phase a
 
 1. Repository and development environment: **Complete**
 2. FastAPI backend foundation: **Complete**
-3. PostgreSQL database: **Planned**
+3. PostgreSQL database: **In progress**
 4. Job model and REST APIs: **Planned**
 5. Authentication and authorization: **Planned**
 6. Redis: **Planned**
@@ -114,6 +114,18 @@ git remote -v
 ```
 
 PostgreSQL, Redis, workers, Docker, and cloud services are not required for Phase 1 and will be introduced in later phases.
+
+### PostgreSQL database
+
+Phase 2 uses the local PostgreSQL database named `job_processing`. Set `DATABASE_URL` in the root `.env` file; keep the password local and never commit `.env`.
+
+From the `backend` directory, the database migration commands are:
+
+```powershell
+alembic upgrade head
+```
+
+Phase 2 creates the connection and migration foundation only. User and job tables are planned for later phases.
 
 ## Environment Variables
 

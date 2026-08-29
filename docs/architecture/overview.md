@@ -6,7 +6,9 @@ This document describes the intended final architecture. The components below wi
 
 ## Current Phase 1 Boundary
 
-FastAPI is the first running application component. It provides the HTTP boundary, validates requests and responses through Pydantic, exposes versioned routes under `/api/v1`, and reads basic settings from environment variables. It does not persist data or process jobs yet.
+FastAPI is the first running application component. It provides the HTTP boundary, validates requests and responses through Pydantic, exposes versioned routes under `/api/v1`, and reads basic settings from environment variables. Phase 2 adds SQLAlchemy as the database access layer and Alembic for controlled schema changes. No application tables are defined yet.
+
+PostgreSQL is used for durable, relational state. SQLAlchemy provides a consistent Python session interface, while Alembic records schema changes as versioned migrations. Keeping these concerns separate from route handlers makes later user and job features easier to test and evolve.
 
 API versioning keeps the public contract explicit. Future breaking changes can be introduced under another version while existing clients continue using the current version.
 
