@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     app_name: str = "distributed-job-processing-platform"
     api_v1_prefix: str = "/api/v1"
     database_url: str = "postgresql+psycopg://postgres:password@localhost:5432/job_processing"
+    secret_key: str = "dev-secret-key-change-in-production"
 
     model_config = SettingsConfigDict(
         env_file=PROJECT_ROOT / ".env",

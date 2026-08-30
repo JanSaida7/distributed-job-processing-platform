@@ -2,7 +2,7 @@ D:\distributed-job-processing-platform\.venv\Scripts\python.exe# Distributed Job
 
 A production-oriented portfolio project for learning how to design and operate a distributed job processing system. The platform will accept jobs through a versioned REST API, track their lifecycle, and process them asynchronously with workers.
 
-> **Current status:** Phase 3 complete. PostgreSQL database is live, users and jobs tables are created and migrated, and the complete job lifecycle API is implemented with full CRUD and status transitions.
+> **Current status:** Phase 4 complete. JWT authentication and authorization is implemented with password hashing (argon2), protected endpoints, and multi-tenant user isolation. All 22 tests passing.
 
 ## Problem Statement
 
@@ -52,7 +52,7 @@ This architecture is planned. Its components will be introduced phase by phase a
 2. FastAPI backend foundation: **Complete**
 3. PostgreSQL database: **Complete**
 4. Job model and REST APIs: **Complete**
-5. Authentication and authorization: **Planned**
+5. Authentication and authorization: **Complete**
 6. Redis: **Planned**
 7. Celery workers: **Planned**
 8. Retry mechanism and failure handling: **Planned**

@@ -10,6 +10,7 @@ from app.db.session import get_db
 from app.schemas.job import JobCreate, JobResponse
 from app.schemas.job_result import JobResultUpdate
 from app.schemas.job_status import JobStatusUpdate
+from app.core.security import get_current_user_id
 
 
 router = APIRouter(tags=["jobs"])
@@ -45,8 +46,13 @@ def _serialize_job_response(job: Job) -> JobResponse:
 
 
 @router.post("/jobs", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
-def create_job(job: JobCreate, db: Session = Depends(get_db)) -> JobResponse:
+def create_job(
+    job: JobCreate,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+) -> JobResponse:
     db_job = Job(
+        user_id=user_id,
         name=job.name,
         status="queued",
         payload=json.dumps(job.payload) if job.payload is not None else None,
@@ -58,14 +64,21 @@ def create_job(job: JobCreate, db: Session = Depends(get_db)) -> JobResponse:
 
 
 @router.get("/jobs", response_model=list[JobResponse])
-def list_jobs(db: Session = Depends(get_db)) -> list[JobResponse]:
-    jobs = db.query(Job).order_by(Job.created_at.desc()).all()
+def list_jobs(
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+) -> list[JobResponse]:
+    jobs = db.query(Job).filter(Job.user_id == user_id).order_by(Job.created_at.desc()).all()
     return [_serialize_job_response(job) for job in jobs]
 
 
 @router.get("/jobs/{job_id}", response_model=JobResponse)
-def get_job(job_id: int, db: Session = Depends(get_db)) -> JobResponse:
-    job = db.query(Job).filter(Job.id == job_id).one_or_none()
+def get_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+) -> JobResponse:
+    job = db.query(Job).filter(Job.id == job_id, Job.user_id == user_id).one_or_none()
     if job is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
     return _serialize_job_response(job)
@@ -76,8 +89,9 @@ def update_job_status(
     job_id: int,
     update: JobStatusUpdate,
     db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
 ) -> JobResponse:
-    job = db.query(Job).filter(Job.id == job_id).one_or_none()
+    job = db.query(Job).filter(Job.id == job_id, Job.user_id == user_id).one_or_none()
     if job is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 
@@ -97,8 +111,9 @@ def update_job_result(
     job_id: int,
     update: JobResultUpdate,
     db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
 ) -> JobResponse:
-    job = db.query(Job).filter(Job.id == job_id).one_or_none()
+    job = db.query(Job).filter(Job.id == job_id, Job.user_id == user_id).one_or_none()
     if job is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 
