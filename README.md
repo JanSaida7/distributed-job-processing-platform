@@ -2,7 +2,7 @@ D:\distributed-job-processing-platform\.venv\Scripts\python.exe# Distributed Job
 
 A production-oriented portfolio project for learning how to design and operate a distributed job processing system. The platform will accept jobs through a versioned REST API, track their lifecycle, and process them asynchronously with workers.
 
-> **Current status:** Phase 4 complete. JWT authentication and authorization is implemented with password hashing (argon2), protected endpoints, and multi-tenant user isolation. All 22 tests passing.
+> **Current status:** Phase 5 complete. Redis and Celery queueing are implemented, the API dispatches jobs to a worker, and the queue health endpoint is active. All backend tests are passing.
 
 ## Problem Statement
 
@@ -31,7 +31,7 @@ FastAPI REST API
 Celery Workers --> Job Execution --> Completed / Failed / Dead Letter
 ```
 
-This architecture is planned. Its components will be introduced phase by phase and are not implemented yet.
+This architecture is now active for the job-processing pipeline: PostgreSQL stores job state, Redis provides the broker, and Celery workers process queued jobs asynchronously.
 
 ## Planned Technology Stack
 
@@ -53,19 +53,18 @@ This architecture is planned. Its components will be introduced phase by phase a
 3. PostgreSQL database: **Complete**
 4. Job model and REST APIs: **Complete**
 5. Authentication and authorization: **Complete**
-6. Redis: **Planned**
-7. Celery workers: **Planned**
-8. Retry mechanism and failure handling: **Planned**
-9. Dead Letter Queue: **Planned**
-10. Idempotency and concurrency safety: **Planned**
-11. Basic React frontend: **Planned**
-12. Docker and Docker Compose: **Planned**
-13. Testing and code quality: **Planned**
-14. AWS deployment: **Planned**
-15. CloudWatch monitoring and logging: **Planned**
-16. GitHub Actions CI/CD: **Planned**
-17. Scaling and performance testing: **Planned**
-18. Final documentation and resume preparation: **Planned**
+6. Redis and Celery queueing: **Complete**
+7. Retry mechanism and failure handling: **In progress**
+8. Dead Letter Queue: **Planned**
+9. Idempotency and concurrency safety: **Planned**
+10. Basic React frontend: **Planned**
+11. Docker and Docker Compose: **Planned**
+12. Testing and code quality: **Planned**
+13. AWS deployment: **Planned**
+14. CloudWatch monitoring and logging: **Planned**
+15. GitHub Actions CI/CD: **Planned**
+16. Scaling and performance testing: **Planned**
+17. Final documentation and resume preparation: **Planned**
 
 ## Project Structure
 

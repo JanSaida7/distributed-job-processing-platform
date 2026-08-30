@@ -1,6 +1,6 @@
 # Backend
 
-The backend is a FastAPI application with a PostgreSQL database. Phase 1 provides versioned health and information endpoints with environment-based configuration. Phase 2 adds SQLAlchemy sessions and Alembic migrations. Phase 3 implements the complete job lifecycle API with create, read, update, status transitions, and result handling.
+The backend is a FastAPI application with PostgreSQL and Redis integration. Phase 1 provides versioned health and information endpoints with environment-based configuration. Phase 2 adds SQLAlchemy sessions and Alembic migrations. Phase 3 implements the complete job lifecycle API with create, read, update, status transitions, and result handling. Phase 5 adds Redis and Celery job queueing, background task execution, and queue health checks.
 
 ## Setup
 
@@ -46,4 +46,4 @@ alembic upgrade head
 
 Users and jobs tables are created in Phase 3 with full Alembic migrations.
 
-Redis, Celery, authentication, and distributed job processing are planned for later phases.
+Redis and Celery are active in Phase 5, and authentication remains in place for protected job APIs.

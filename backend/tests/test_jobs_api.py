@@ -1,4 +1,4 @@
-from fastapi.testclient import TestClient
+﻿from fastapi.testclient import TestClient
 import uuid
 
 from app.main import app
@@ -188,3 +188,30 @@ def test_update_job_result_sets_completion_output() -> None:
     assert data["result"] == {"rows_processed": 3, "status": "ok"}
     assert data["status"] == "completed"
     assert data["finished_at"] is not None
+
+def test_process_job_task_completes_job_in_eager_mode() -> None:
+    token = _register_and_login()
+    response = client.post(
+        "/api/v1/jobs",
+        json={"name": "queued-worker-job", "payload": {"task": "transform", "value": 11}},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 201, response.text
+    job_id = response.json()["id"]
+
+    from app.tasks import process_job
+
+    result = process_job(job_id, user_id=None)
+
+    assert result["status"] == "completed"
+    assert result["result"]["source"] == "celery-worker"
+
+    db = SessionLocal()
+    try:
+        job = db.query(Job).filter(Job.id == job_id).one()
+        assert job.status == "completed"
+        assert job.result is not None
+        assert 'celery-worker' in job.result
+    finally:
+        db.close()

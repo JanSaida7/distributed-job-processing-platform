@@ -11,6 +11,7 @@ from app.schemas.job import JobCreate, JobResponse
 from app.schemas.job_result import JobResultUpdate
 from app.schemas.job_status import JobStatusUpdate
 from app.core.security import get_current_user_id
+from app.tasks import enqueue_job
 
 
 router = APIRouter(tags=["jobs"])
@@ -60,6 +61,12 @@ def create_job(
     db.add(db_job)
     db.commit()
     db.refresh(db_job)
+
+    try:
+        enqueue_job(db_job.id, user_id)
+    except Exception:
+        pass
+
     return _serialize_job_response(db_job)
 
 

@@ -22,3 +22,12 @@ def test_info_endpoint() -> None:
         "environment": "development",
         "version": "0.1.0",
     }
+
+
+def test_queue_status_endpoint() -> None:
+    response = client.get("/api/v1/queue-status")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["broker"] == "redis"
+    assert data["status"] in {"connected", "disconnected"}
