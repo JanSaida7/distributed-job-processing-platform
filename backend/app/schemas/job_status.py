@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 
-VALID_JOB_STATUSES = {"queued", "running", "completed", "failed", "cancelled"}
+VALID_JOB_STATUSES = {"queued", "running", "completed", "failed", "cancelled", "dead_letter"}
 
 
 class JobStatusUpdate(BaseModel):

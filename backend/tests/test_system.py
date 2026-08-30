@@ -31,3 +31,25 @@ def test_queue_status_endpoint() -> None:
     data = response.json()
     assert data["broker"] == "redis"
     assert data["status"] in {"connected", "disconnected"}
+
+
+def test_queue_metrics_endpoint() -> None:
+    response = client.get("/api/v1/queue-metrics")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["broker"] == "redis"
+    assert data["status"] in {"connected", "disconnected"}
+    assert "job_counts" in data
+
+    counts = data["job_counts"]
+    assert set(counts).issuperset({
+        "total_jobs",
+        "queued_jobs",
+        "running_jobs",
+        "completed_jobs",
+        "failed_jobs",
+        "cancelled_jobs",
+        "dead_letter_jobs",
+    })
+    assert all(isinstance(counts[key], int) for key in counts)

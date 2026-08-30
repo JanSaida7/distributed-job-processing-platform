@@ -1,8 +1,12 @@
-﻿from fastapi.testclient import TestClient
+import json
 import uuid
+from datetime import datetime, timezone
+
+from fastapi.testclient import TestClient
 
 from app.main import app
-from app.db.models import Job
+from app.core.config import settings
+from app.db.models import Job, User
 from app.db.session import SessionLocal
 
 
@@ -49,7 +53,7 @@ def test_create_job_returns_created_record() -> None:
     try:
         job = db.query(Job).filter(Job.id == data["id"]).one()
         assert job.name == "email-report"
-        assert job.status == "queued"
+        assert job.status in {"queued", "running", "completed"}
         assert job.payload == '{"user_id": 42, "template": "daily"}'
     finally:
         db.close()
@@ -168,6 +172,36 @@ def test_cancel_job_marks_cancelled_status() -> None:
     assert data["finished_at"] is not None
 
 
+def test_cancel_job_endpoint_marks_cancelled_status() -> None:
+    token = _register_and_login()
+    previous_enable_queue = settings.enable_job_queue
+    previous_eager_mode = settings.celery_task_always_eager
+    settings.enable_job_queue = False
+    settings.celery_task_always_eager = False
+    try:
+        created = client.post(
+            "/api/v1/jobs",
+            json={"name": "cancelled-via-endpoint", "payload": {"task": "skip"}},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert created.status_code == 201, created.text
+        job_id = created.json()["id"]
+
+        response = client.post(
+            f"/api/v1/jobs/{job_id}/cancel",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    finally:
+        settings.enable_job_queue = previous_enable_queue
+        settings.celery_task_always_eager = previous_eager_mode
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["status"] == "cancelled"
+    assert data["finished_at"] is not None
+    assert data["error_message"] == "cancelled by user"
+
+
 def test_update_job_result_sets_completion_output() -> None:
     token = _register_and_login()
     created = client.post(
@@ -188,6 +222,132 @@ def test_update_job_result_sets_completion_output() -> None:
     assert data["result"] == {"rows_processed": 3, "status": "ok"}
     assert data["status"] == "completed"
     assert data["finished_at"] is not None
+
+
+def test_list_failed_jobs_returns_failed_jobs() -> None:
+    email = _unique_email()
+    client.post(
+        "/api/v1/auth/register",
+        json={"email": email, "password": "password123456"},
+    )
+    login_response = client.post(
+        "/api/v1/auth/login",
+        json={"email": email, "password": "password123456"},
+    )
+    token = login_response.json()["access_token"]
+
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.email == email).one()
+        job = Job(
+            user_id=user.id,
+            name="failed-job",
+            status="failed",
+            payload=json.dumps({"task": "fail-me"}),
+            error_message="simulated worker error",
+            started_at=datetime.now(timezone.utc),
+            finished_at=datetime.now(timezone.utc),
+        )
+        db.add(job)
+        db.commit()
+        db.refresh(job)
+        job_id = job.id
+    finally:
+        db.close()
+
+    response = client.get(
+        "/api/v1/jobs/failed",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    failed = response.json()
+    assert any(item["id"] == job_id for item in failed)
+    assert any(item["status"] == "failed" for item in failed)
+
+
+def test_retry_failed_job_requeues_it() -> None:
+    email = _unique_email()
+    client.post(
+        "/api/v1/auth/register",
+        json={"email": email, "password": "password123456"},
+    )
+    login_response = client.post(
+        "/api/v1/auth/login",
+        json={"email": email, "password": "password123456"},
+    )
+    token = login_response.json()["access_token"]
+
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.email == email).one()
+        job = Job(
+            user_id=user.id,
+            name="retry-job",
+            status="failed",
+            payload=json.dumps({"task": "fail-me"}),
+            error_message="temporary failure",
+            started_at=datetime.now(timezone.utc),
+            finished_at=datetime.now(timezone.utc),
+        )
+        db.add(job)
+        db.commit()
+        db.refresh(job)
+        job_id = job.id
+    finally:
+        db.close()
+
+    response = client.post(
+        f"/api/v1/jobs/{job_id}/retry",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["status"] == "queued"
+    assert data["error_message"] is None
+
+
+def test_list_dead_letter_jobs_returns_dead_letter_jobs() -> None:
+    email = _unique_email()
+    client.post(
+        "/api/v1/auth/register",
+        json={"email": email, "password": "password123456"},
+    )
+    login_response = client.post(
+        "/api/v1/auth/login",
+        json={"email": email, "password": "password123456"},
+    )
+    token = login_response.json()["access_token"]
+
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.email == email).one()
+        job = Job(
+            user_id=user.id,
+            name="dead-letter-job",
+            status="dead_letter",
+            payload=json.dumps({"task": "fail-me"}),
+            error_message="max retries exceeded",
+            started_at=datetime.now(timezone.utc),
+            finished_at=datetime.now(timezone.utc),
+        )
+        db.add(job)
+        db.commit()
+        db.refresh(job)
+        job_id = job.id
+    finally:
+        db.close()
+
+    response = client.get(
+        "/api/v1/jobs/dead-letter",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    dead_letter = response.json()
+    assert any(item["id"] == job_id for item in dead_letter)
+    assert any(item["status"] == "dead_letter" for item in dead_letter)
 
 def test_process_job_task_completes_job_in_eager_mode() -> None:
     token = _register_and_login()

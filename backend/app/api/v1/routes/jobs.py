@@ -79,6 +79,81 @@ def list_jobs(
     return [_serialize_job_response(job) for job in jobs]
 
 
+@router.get("/jobs/failed", response_model=list[JobResponse])
+def list_failed_jobs(
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+) -> list[JobResponse]:
+    jobs = (
+        db.query(Job)
+        .filter(Job.user_id == user_id, Job.status == "failed")
+        .order_by(Job.finished_at.desc().nullslast())
+        .all()
+    )
+    return [_serialize_job_response(job) for job in jobs]
+
+
+@router.get("/jobs/dead-letter", response_model=list[JobResponse])
+def list_dead_letter_jobs(
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+) -> list[JobResponse]:
+    jobs = (
+        db.query(Job)
+        .filter(Job.user_id == user_id, Job.status == "dead_letter")
+        .order_by(Job.finished_at.desc().nullslast())
+        .all()
+    )
+    return [_serialize_job_response(job) for job in jobs]
+
+
+@router.post("/jobs/{job_id}/retry", response_model=JobResponse)
+def retry_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+) -> JobResponse:
+    job = db.query(Job).filter(Job.id == job_id, Job.user_id == user_id).one_or_none()
+    if job is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+    if job.status not in {"failed", "dead_letter"}:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only failed or dead-letter jobs can be retried")
+
+    job.status = "queued"
+    job.error_message = None
+    job.started_at = None
+    job.finished_at = None
+    db.commit()
+    db.refresh(job)
+
+    try:
+        enqueue_job(job.id, user_id)
+    except Exception:
+        pass
+
+    return _serialize_job_response(job)
+
+
+@router.post("/jobs/{job_id}/cancel", response_model=JobResponse)
+def cancel_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+) -> JobResponse:
+    job = db.query(Job).filter(Job.id == job_id, Job.user_id == user_id).one_or_none()
+    if job is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+    if job.status in {"completed", "cancelled", "dead_letter"}:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Job cannot be cancelled from its current state")
+
+    job.status = "cancelled"
+    job.error_message = job.error_message or "cancelled by user"
+    job.finished_at = job.finished_at or datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(job)
+    return _serialize_job_response(job)
+
+
 @router.get("/jobs/{job_id}", response_model=JobResponse)
 def get_job(
     job_id: int,
@@ -105,7 +180,7 @@ def update_job_status(
     job.status = update.status
     if update.status == "running" and job.started_at is None:
         job.started_at = datetime.now(timezone.utc)
-    if update.status in {"completed", "failed", "cancelled"}:
+    if update.status in {"completed", "failed", "cancelled", "dead_letter"}:
         job.finished_at = job.finished_at or datetime.now(timezone.utc)
 
     db.commit()

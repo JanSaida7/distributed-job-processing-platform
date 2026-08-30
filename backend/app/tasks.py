@@ -114,10 +114,10 @@ def process_job(self, job_id: int, user_id: int | None = None) -> dict:
             raise self.retry(exc=exc)
         except self.MaxRetriesExceededError:
             if job is not None:
-                job.status = "failed"
+                job.status = "dead_letter"
                 job.error_message = str(exc)
                 job.finished_at = datetime.now(timezone.utc)
                 db.commit()
-            return {"job_id": job_id, "status": "failed", "error": str(exc)}
+            return {"job_id": job_id, "status": "dead_letter", "error": str(exc)}
     finally:
         db.close()

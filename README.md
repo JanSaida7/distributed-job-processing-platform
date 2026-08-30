@@ -2,7 +2,7 @@ D:\distributed-job-processing-platform\.venv\Scripts\python.exe# Distributed Job
 
 A production-oriented portfolio project for learning how to design and operate a distributed job processing system. The platform will accept jobs through a versioned REST API, track their lifecycle, and process them asynchronously with workers.
 
-> **Current status:** Phase 5 complete. Redis and Celery queueing are implemented, the API dispatches jobs to a worker, and the queue health endpoint is active. All backend tests are passing.
+> **Current status:** Phase 6 complete. The platform includes authenticated job APIs, Redis/Celery queue execution, failed-job and dead-letter handling, retry and cancellation flows, and queue metrics. All backend tests are passing.
 
 ## Problem Statement
 
@@ -53,18 +53,17 @@ This architecture is now active for the job-processing pipeline: PostgreSQL stor
 3. PostgreSQL database: **Complete**
 4. Job model and REST APIs: **Complete**
 5. Authentication and authorization: **Complete**
-6. Redis and Celery queueing: **Complete**
-7. Retry mechanism and failure handling: **In progress**
-8. Dead Letter Queue: **Planned**
-9. Idempotency and concurrency safety: **Planned**
-10. Basic React frontend: **Planned**
-11. Docker and Docker Compose: **Planned**
-12. Testing and code quality: **Planned**
-13. AWS deployment: **Planned**
-14. CloudWatch monitoring and logging: **Planned**
-15. GitHub Actions CI/CD: **Planned**
-16. Scaling and performance testing: **Planned**
-17. Final documentation and resume preparation: **Planned**
+6. Redis, Celery, retry, failure handling, and reliability hardening: **Complete**
+7. Dead-letter and operational queue visibility: **Complete**
+8. Idempotency and concurrency safety: **Planned**
+9. Basic React frontend: **Planned**
+10. Docker and Docker Compose: **Planned**
+11. Testing and code quality: **Planned**
+12. AWS deployment: **Planned**
+13. CloudWatch monitoring and logging: **Planned**
+14. GitHub Actions CI/CD: **Planned**
+15. Scaling and performance testing: **Planned**
+16. Final documentation and resume preparation: **Planned**
 
 ## Project Structure
 
