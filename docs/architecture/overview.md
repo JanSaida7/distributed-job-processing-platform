@@ -2,7 +2,7 @@
 
 ## Status
 
-This document describes the architecture through Phase 9. FastAPI, PostgreSQL, Redis/Celery, authentication, and the React dashboard are implemented locally. Containerization and cloud infrastructure remain planned.
+This document describes the architecture through Phase 10. FastAPI, PostgreSQL, Redis/Celery, authentication, the React dashboard, and a Docker Compose development stack are implemented. Cloud infrastructure remains planned.
 
 ## Current Application Boundary
 
@@ -18,7 +18,7 @@ Clients submit and inspect jobs through the versioned FastAPI REST API. The API 
 
 Redis is the queue transport and Celery workers consume queued jobs, execute supported payload operations, and update job state. PostgreSQL remains the source of truth for users, jobs, lifecycle state, retry information, and timestamps.
 
-The React dashboard calls the REST API, supports registration/login, job submission, status polling, job details, retry, cancellation, and failed/dead-letter views. Nginx or a cloud API gateway may sit at the edge in a deployed environment.
+The React dashboard calls the REST API, supports registration/login, job submission, status polling, job details, retry, cancellation, and failed/dead-letter views. In Docker Compose, Nginx serves the production frontend build; a cloud API gateway may sit at the edge in a deployed environment.
 
 ## Planned Flow
 

@@ -2,7 +2,7 @@
 
 A production-oriented portfolio project for learning how to design and operate a distributed job processing system. The platform will accept jobs through a versioned REST API, track their lifecycle, and process them asynchronously with workers.
 
-> **Current status:** Phase 9 complete. The platform includes authenticated job APIs, Redis/Celery queue execution, failure handling, retry and cancellation flows, idempotency and optimistic locking, plus a React dashboard for submitting and monitoring jobs.
+> **Current status:** Phase 10 complete. The platform includes authenticated job APIs, Redis/Celery queue execution, failure handling, retry and cancellation flows, idempotency and optimistic locking, a React dashboard, and a complete Docker Compose development stack.
 
 ## Problem Statement
 
@@ -57,7 +57,7 @@ This architecture is now active for the job-processing pipeline: PostgreSQL stor
 7. Dead-letter and operational queue visibility: **Complete**
 8. Idempotency and concurrency safety: **Complete**
 9. Basic React frontend: **Complete**
-10. Docker and Docker Compose: **Planned**
+10. Docker and Docker Compose: **Complete**
 11. Testing and code quality: **Planned**
 12. AWS deployment: **Planned**
 13. CloudWatch monitoring and logging: **Planned**
@@ -140,6 +140,37 @@ Migrations create the `users` and `jobs` tables, including job idempotency and v
 ## Environment Variables
 
 `.env.example` documents the backend configuration. Copy it to `.env` for local development and never commit real credentials.
+
+## Docker Compose
+
+Docker Compose runs PostgreSQL, Redis, the migration job, FastAPI API, Celery worker, and the React dashboard together. Copy `.env.example` to `.env`, set a strong `SECRET_KEY` and a local `POSTGRES_PASSWORD`, then run:
+
+```powershell
+docker compose up --build
+```
+
+The dashboard is available at `http://localhost:3000`; the API and its interactive documentation are available at `http://localhost:8000` and `http://localhost:8000/docs`. Stop the stack with `docker compose down`. To also delete the local database volume, use `docker compose down --volumes`.
+
+### Docker Hub images
+
+The Phase 10 images are published under the `jansaida7` Docker Hub account:
+
+- `jansaida7/job-platform-backend:phase10` (also tagged `latest`), used by the API and Celery worker
+- `jansaida7/job-platform-frontend:phase10` (also tagged `latest`)
+
+To publish a future release, build each image once, add the `latest` tag to that same image, then push both tags:
+
+```powershell
+docker build -t jansaida7/job-platform-backend:phase10 -f backend/Dockerfile backend
+docker tag jansaida7/job-platform-backend:phase10 jansaida7/job-platform-backend:latest
+docker push jansaida7/job-platform-backend:phase10
+docker push jansaida7/job-platform-backend:latest
+
+docker build -t jansaida7/job-platform-frontend:phase10 -f frontend/Dockerfile --build-arg VITE_API_BASE_URL=http://localhost:8000 frontend
+docker tag jansaida7/job-platform-frontend:phase10 jansaida7/job-platform-frontend:latest
+docker push jansaida7/job-platform-frontend:phase10
+docker push jansaida7/job-platform-frontend:latest
+```
 
 ## Documentation
 

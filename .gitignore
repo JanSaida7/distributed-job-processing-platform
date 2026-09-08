@@ -22,6 +22,9 @@ ENV/
 node_modules/
 frontend/dist/
 
+# Docker Compose overrides
+compose.override.yaml
+
 # Test and coverage artifacts
 .pytest_cache/
 .coverage

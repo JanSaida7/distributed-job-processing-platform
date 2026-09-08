@@ -47,3 +47,7 @@ alembic upgrade head
 Users and jobs tables are created in Phase 3 with full Alembic migrations.
 
 Redis and Celery are active in Phase 5, and authentication remains in place for protected job APIs.
+
+## Docker
+
+The root `docker-compose.yml` builds this service as both the API and Celery worker, applies migrations, and starts PostgreSQL and Redis. From the repository root, configure `.env` from `.env.example` and run `docker compose up --build`.
