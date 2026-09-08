@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from starlette.requests import Request
 from passlib.context import CryptContext
 from jose import JWTError, jwt

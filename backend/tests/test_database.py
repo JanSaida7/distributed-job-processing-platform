@@ -4,9 +4,8 @@ from app.core.config import settings
 from app.db.session import engine
 
 
-def test_database_url_targets_postgresql_database() -> None:
-    assert settings.database_url.startswith("postgresql+psycopg://")
-    assert settings.database_url.endswith("/job_processing")
+def test_database_url_uses_disposable_test_database() -> None:
+    assert settings.database_url == "sqlite+pysqlite://"
 
 
 def test_database_connection() -> None:

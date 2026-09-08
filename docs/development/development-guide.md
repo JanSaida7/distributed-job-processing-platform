@@ -55,6 +55,10 @@ Phase 9 adds a React and Vite dashboard in `frontend/`. Run `npm install` once, 
 - Run the smallest relevant test set during development, then the full suite before a meaningful commit.
 - Pytest will be the project test framework once application code is introduced.
 
+## Quality Checks
+
+Phase 11 makes backend tests self-contained through an in-memory SQLite test database, preventing test runs from changing a local PostgreSQL instance or enqueueing real jobs. Run `pytest` and `ruff check app` from `backend/`. Run `npm run test`, `npm run lint`, and `npm run build` from `frontend/` for the dashboard checks.
+
 ## Commit Conventions
 
 Use imperative, descriptive Conventional Commit messages:

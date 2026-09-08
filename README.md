@@ -2,7 +2,7 @@
 
 A production-oriented portfolio project for learning how to design and operate a distributed job processing system. The platform will accept jobs through a versioned REST API, track their lifecycle, and process them asynchronously with workers.
 
-> **Current status:** Phase 10 complete. The platform includes authenticated job APIs, Redis/Celery queue execution, failure handling, retry and cancellation flows, idempotency and optimistic locking, a React dashboard, and a complete Docker Compose development stack.
+> **Current status:** Phase 11 complete. The platform includes authenticated job APIs, Redis/Celery queue execution, failure handling, retry and cancellation flows, idempotency and optimistic locking, a React dashboard, Docker Compose, and automated quality checks.
 
 ## Problem Statement
 
@@ -58,7 +58,7 @@ This architecture is now active for the job-processing pipeline: PostgreSQL stor
 8. Idempotency and concurrency safety: **Complete**
 9. Basic React frontend: **Complete**
 10. Docker and Docker Compose: **Complete**
-11. Testing and code quality: **Planned**
+11. Testing and code quality: **Complete**
 12. AWS deployment: **Planned**
 13. CloudWatch monitoring and logging: **Planned**
 14. GitHub Actions CI/CD: **Planned**
@@ -181,7 +181,26 @@ See the [API endpoint documentation](docs/api/endpoints.md) for the currently av
 
 ## Testing
 
-The backend uses Pytest. Run `pytest` from `backend/` before meaningful commits.
+Backend tests use a disposable in-memory SQLite database, so they do not require PostgreSQL or Redis. They include coverage reporting and a 60% minimum threshold:
+
+```powershell
+Set-Location backend
+pip install -r requirements.txt
+pytest
+ruff check app
+```
+
+Frontend checks include API-client tests, linting, and a production build:
+
+```powershell
+Set-Location frontend
+npm install
+npm run test
+npm run lint
+npm run build
+```
+
+The Phase 11 frontend suite currently passes: 2 Vitest tests, ESLint, and the production build.
 
 ## Future Improvements
 
