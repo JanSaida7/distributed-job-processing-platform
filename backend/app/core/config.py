@@ -1,10 +1,17 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Annotated
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BeforeValidator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
+CorsOrigins = Annotated[
+    list[str],
+    NoDecode,
+    BeforeValidator(lambda value: value.split(",") if isinstance(value, str) else value),
+]
 
 
 class Settings(BaseSettings):
@@ -18,6 +25,7 @@ class Settings(BaseSettings):
     celery_result_backend: str = "redis://localhost:6379/0"
     celery_task_always_eager: bool = False
     enable_job_queue: bool = True
+    cors_origins: CorsOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
     model_config = SettingsConfigDict(
         env_file=PROJECT_ROOT / ".env",

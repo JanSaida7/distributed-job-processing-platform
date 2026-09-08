@@ -43,6 +43,10 @@ Use lowercase names with a category and short description:
 - Document architectural decisions, especially why a new component is needed.
 - Do not add future-phase technologies early without a concrete dependency.
 
+## Frontend Development
+
+Phase 9 adds a React and Vite dashboard in `frontend/`. Run `npm install` once, then `npm run dev` from that directory. The default API address is `http://127.0.0.1:8000`; override it with `VITE_API_BASE_URL` in a local frontend environment file. Ensure the frontend origin is present in the backend `CORS_ORIGINS` setting.
+
 ## Testing Principles
 
 - Add tests with each behavior change.

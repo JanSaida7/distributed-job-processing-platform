@@ -2,11 +2,11 @@
 
 ## Status
 
-This document describes the intended final architecture. The components below will be introduced incrementally. The Phase 1 FastAPI foundation is implemented; databases, queues, workers, and infrastructure remain planned.
+This document describes the architecture through Phase 9. FastAPI, PostgreSQL, Redis/Celery, authentication, and the React dashboard are implemented locally. Containerization and cloud infrastructure remain planned.
 
-## Current Phase 1 Boundary
+## Current Application Boundary
 
-FastAPI is the first running application component. It provides the HTTP boundary, validates requests and responses through Pydantic, exposes versioned routes under `/api/v1`, and reads basic settings from environment variables. Phase 2 adds SQLAlchemy as the database access layer and Alembic for controlled schema changes. No application tables are defined yet.
+FastAPI provides the HTTP boundary, validates requests and responses through Pydantic, exposes versioned routes under `/api/v1`, and reads settings from environment variables. SQLAlchemy manages PostgreSQL sessions and Alembic controls schema changes. The API has `users` and `jobs` tables, JWT authentication, user-scoped job access, and configurable CORS for the dashboard.
 
 PostgreSQL is used for durable, relational state. SQLAlchemy provides a consistent Python session interface, while Alembic records schema changes as versioned migrations. Keeping these concerns separate from route handlers makes later user and job features easier to test and evolve.
 
@@ -14,11 +14,11 @@ API versioning keeps the public contract explicit. Future breaking changes can b
 
 ## Intended System
 
-Clients will submit and inspect jobs through a versioned FastAPI REST API. The API will validate requests and eventually coordinate durable state in PostgreSQL. Long-running work will later be handed to a queue instead of being performed during the request.
+Clients submit and inspect jobs through the versioned FastAPI REST API. The API persists job state in PostgreSQL and hands work to Celery through Redis so that the request remains short.
 
-Redis is planned as the queue transport and for short-lived coordination data. Celery workers will consume queued jobs, execute the supported job types, and update job state. PostgreSQL will remain the source of truth for users, jobs, lifecycle state, retry information, and timestamps.
+Redis is the queue transport and Celery workers consume queued jobs, execute supported payload operations, and update job state. PostgreSQL remains the source of truth for users, jobs, lifecycle state, retry information, and timestamps.
 
-A future React dashboard will call the REST API and display job lists, status, retry information, and errors. Nginx or a cloud API gateway may sit at the edge in a deployed environment.
+The React dashboard calls the REST API, supports registration/login, job submission, status polling, job details, retry, cancellation, and failed/dead-letter views. Nginx or a cloud API gateway may sit at the edge in a deployed environment.
 
 ## Planned Flow
 

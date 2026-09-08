@@ -1,8 +1,8 @@
-D:\distributed-job-processing-platform\.venv\Scripts\python.exe# Distributed Job Processing Platform
+# Distributed Job Processing Platform
 
 A production-oriented portfolio project for learning how to design and operate a distributed job processing system. The platform will accept jobs through a versioned REST API, track their lifecycle, and process them asynchronously with workers.
 
-> **Current status:** Phase 8 complete. The platform includes authenticated job APIs, Redis/Celery queue execution, failed-job and dead-letter handling, retry and cancellation flows, operational queue visibility, idempotent job submission, and optimistic locking for concurrency safety. All 39 backend tests are passing.
+> **Current status:** Phase 9 complete. The platform includes authenticated job APIs, Redis/Celery queue execution, failure handling, retry and cancellation flows, idempotency and optimistic locking, plus a React dashboard for submitting and monitoring jobs.
 
 ## Problem Statement
 
@@ -56,7 +56,7 @@ This architecture is now active for the job-processing pipeline: PostgreSQL stor
 6. Redis, Celery, retry, failure handling, and reliability hardening: **Complete**
 7. Dead-letter and operational queue visibility: **Complete**
 8. Idempotency and concurrency safety: **Complete**
-9. Basic React frontend: **Planned**
+9. Basic React frontend: **Complete**
 10. Docker and Docker Compose: **Planned**
 11. Testing and code quality: **Planned**
 12. AWS deployment: **Planned**
@@ -69,7 +69,7 @@ This architecture is now active for the job-processing pipeline: PostgreSQL stor
 
 ```text
 backend/                  # FastAPI backend foundation
-frontend/                 # React application, added in a later phase
+frontend/                 # React/Vite dashboard for job submission and monitoring
 docs/architecture/        # Architecture decisions and diagrams
 docs/api/                 # API documentation, added with API endpoints
 docs/development/         # Local development and contribution guidance
@@ -80,7 +80,7 @@ docs/development/         # Local development and contribution guidance
 
 ### Backend setup
 
-From the repository root, create a virtual environment, activate it, and install the Phase 1 dependencies:
+From the repository root, create a virtual environment, activate it, and install the backend dependencies:
 
 ```powershell
 python -m venv .venv
@@ -98,6 +98,18 @@ uvicorn app.main:app --reload
 
 The API will be available at `http://127.0.0.1:8000`. Interactive API documentation is available at `/docs`.
 
+### Frontend setup
+
+In a second terminal, start the React dashboard:
+
+```powershell
+Set-Location frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`. The dashboard connects to `http://127.0.0.1:8000` by default. Set `VITE_API_BASE_URL` in `frontend/.env.local` to use another API address.
+
 Run the backend tests from the `backend` directory:
 
 ```powershell
@@ -111,11 +123,11 @@ git status
 git remote -v
 ```
 
-PostgreSQL, Redis, workers, Docker, and cloud services are not required for Phase 1 and will be introduced in later phases.
+The API requires PostgreSQL. Redis and a Celery worker are required to process queued jobs asynchronously; without them, the API remains available but newly submitted jobs cannot be processed.
 
 ### PostgreSQL database
 
-Phase 2 uses the local PostgreSQL database named `job_processing`. Set `DATABASE_URL` in the root `.env` file; keep the password local and never commit `.env`.
+The application uses a local PostgreSQL database named `job_processing`. Set `DATABASE_URL` in the root `.env` file; keep the password local and never commit `.env`.
 
 From the `backend` directory, the database migration commands are:
 
@@ -123,11 +135,11 @@ From the `backend` directory, the database migration commands are:
 alembic upgrade head
 ```
 
-Phase 2 creates the connection and migration foundation only. User and job tables are planned for later phases.
+Migrations create the `users` and `jobs` tables, including job idempotency and version fields.
 
 ## Environment Variables
 
-`.env.example` contains placeholder configuration names for planned phases. Copy it to `.env` only for local development when configuration is required. Never commit `.env` or real credentials.
+`.env.example` documents the backend configuration. Copy it to `.env` for local development and never commit real credentials.
 
 ## Documentation
 
@@ -138,8 +150,8 @@ See the [API endpoint documentation](docs/api/endpoints.md) for the currently av
 
 ## Testing
 
-The Phase 1 backend uses Pytest. Run `pytest` from `backend/` before meaningful commits.
+The backend uses Pytest. Run `pytest` from `backend/` before meaningful commits.
 
 ## Future Improvements
 
-Scaling, richer job types, production deployment, monitoring, CI/CD, and frontend workflows are planned for later phases. They are intentionally not implemented in Phase 0.
+Scaling, richer job types, production deployment, monitoring, and CI/CD are planned for later phases.

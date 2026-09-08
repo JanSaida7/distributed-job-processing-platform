@@ -18,6 +18,10 @@ venv/
 env/
 ENV/
 
+# JavaScript dependencies and build output
+node_modules/
+frontend/dist/
+
 # Test and coverage artifacts
 .pytest_cache/
 .coverage

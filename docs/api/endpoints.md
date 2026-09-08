@@ -2,7 +2,7 @@
 
 ## API conventions
 
-The Phase 1 API is versioned under `/api/v1`. Versioning makes the public URL contract explicit and gives future releases room for breaking changes without silently changing existing clients.
+The API is versioned under `/api/v1`. Versioning makes the public URL contract explicit and gives future releases room for breaking changes without silently changing existing clients.
 
 Successful responses use the endpoint-specific schema. Errors use this common shape:
 
@@ -16,7 +16,15 @@ Successful responses use the endpoint-specific schema. Errors use this common sh
 }
 ```
 
-No authentication is required in Phase 1. Authentication is planned for a later phase.
+`/health`, `/info`, `/queue-status`, and `/queue-metrics` are public. Job endpoints require a Bearer JWT obtained from the authentication endpoints.
+
+## Implemented endpoint groups
+
+- `POST /auth/register` and `POST /auth/login` register users and issue JWTs.
+- `GET` and `POST /jobs` list and submit the authenticated user's jobs.
+- `GET /jobs/{job_id}`, `POST /jobs/{job_id}/cancel`, and `POST /jobs/{job_id}/retry` inspect or control a job.
+- `GET /jobs/failed` and `GET /jobs/dead-letter` provide operational views.
+- `PATCH /jobs/{job_id}/status` supports version-aware status updates; `PATCH /jobs/{job_id}/result` records a result.
 
 ## GET /api/v1/health
 
