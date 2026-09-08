@@ -2,7 +2,7 @@ D:\distributed-job-processing-platform\.venv\Scripts\python.exe# Distributed Job
 
 A production-oriented portfolio project for learning how to design and operate a distributed job processing system. The platform will accept jobs through a versioned REST API, track their lifecycle, and process them asynchronously with workers.
 
-> **Current status:** Phase 6 complete. The platform includes authenticated job APIs, Redis/Celery queue execution, failed-job and dead-letter handling, retry and cancellation flows, and queue metrics. All backend tests are passing.
+> **Current status:** Phase 7 complete. The platform includes authenticated job APIs, Redis/Celery queue execution, failed-job and dead-letter handling, retry and cancellation flows, operational queue visibility, and metrics endpoints. All 29 backend tests are passing.
 
 ## Problem Statement
 
