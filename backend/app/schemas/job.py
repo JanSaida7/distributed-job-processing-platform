@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 class JobCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     payload: dict[str, Any] | list[Any] | str | None = None
+    idempotency_key: str | None = Field(None, min_length=1, max_length=255)
 
     @field_validator("payload")
     @classmethod
@@ -27,6 +28,7 @@ class JobResponse(BaseModel):
     payload: dict[str, Any] | list[Any] | str | None = None
     result: dict[str, Any] | list[Any] | str | None = None
     error_message: str | None = None
+    version: int
     created_at: datetime
     updated_at: datetime
     started_at: datetime | None = None
